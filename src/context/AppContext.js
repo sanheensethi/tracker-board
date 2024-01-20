@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import endpoints from "../config/endpoints";
 import uuid from 'react-uuid';
+import { data } from "../data/data";
 export const AppContext = createContext();
 
 export function useTask() {
@@ -14,11 +15,11 @@ export const AppProvider = ({ children }) => {
 
   useEffect(()=>{
     const fetchData = async () => {
-      const response = await fetch(endpoints['get-all-tasks']);
+      const response = await fetch(endpoints['get-json']);
       if (!response.ok){
         throw new Error('Failed to fetch data');
       }
-      const tasks = await response.json()
+      let tasks = await response.json();
       console.log(tasks);
       setViewItems(tasks);
     }
@@ -37,35 +38,49 @@ export const AppProvider = ({ children }) => {
     fetchStatusData();
   },[])
 
+  const updateAllTasks = (viewId,tasks) => {
+    const newViewItems = viewItems.map((view) =>
+      view.id === viewId
+        ? {
+            ...view,
+            tasks: tasks
+          }
+        : view
+    );
+    fetch(endpoints["set-json"], {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'text/plain',
+          'Accept': '*/*'
+      },
+      body: JSON.stringify(newViewItems)
+  })
+    setViewItems(newViewItems);
+  }
 
   const addTask = (title, viewId) => {
     // do api call to add task to backend
     const newTask = {
       id: uuid(),
       title,
-      scheduleDate: "",
+      row: Number(viewItems[viewId].tasks.length),
       description: "",
       
-    };
-    let apiData = {
-      id: newTask.id,
-      title: newTask.title,
-      scheduleDate: newTask.scheduleDate,
-      status: taskStatusList[viewId],
-      description: newTask.description
     };
     const newViewItems = viewItems.map((view) =>
       view.id === viewId ? { ...view, tasks: [...view.tasks, newTask] } : view
     );
-    fetch(endpoints["add-task"], {
+    newViewItems.forEach((obj)=>{
+      obj.tasks.sort((a,b)=>(parseInt(a.row)-parseInt(b.row)));
+    });
+    fetch(endpoints["set-json"], {
       method: 'POST',
       headers: {
           'Content-Type': 'text/plain',
           'Accept': '*/*'
       },
-      body: JSON.stringify(apiData)
+      body: JSON.stringify(newViewItems)
   })
-  console.log(JSON.stringify(apiData))
     setViewItems(newViewItems);
   };
 
@@ -81,9 +96,6 @@ export const AppProvider = ({ children }) => {
 
   const deleteTask = (taskId, viewId) => {
     // call api to backend to delete task in backend
-    let apiData = {
-      id: taskId
-    };
     const newViewItems = viewItems.map((view) =>
       view.id === viewId
         ? {
@@ -92,26 +104,25 @@ export const AppProvider = ({ children }) => {
           }
         : view
     );
-    fetch(endpoints["delete-task"], {
+    newViewItems.forEach((obj)=>{
+      obj.tasks.sort((a,b)=>(parseInt(a.row)-parseInt(b.row)));
+    });
+    newViewItems.map((view)=>{
+      return view.tasks.forEach((task,index)=>{return (task.row = index)})
+    })
+    fetch(endpoints["set-json"], {
       method: 'POST',
       headers: {
           'Content-Type': 'text/plain',
           'Accept': '*/*'
       },
-      body: JSON.stringify(apiData)
-    });
+      body: JSON.stringify(newViewItems)
+  })
     setViewItems(newViewItems);
   };
 
-  const updateTask = (taskId, viewId, title, description, scheduleDate) => {
+  const updateTask = (taskId, viewId, title, description) => {
     // call api to backend to update the task in backend
-    let apiData = {
-      id: taskId,
-      title: title,
-      scheduleDate: scheduleDate,
-      status: taskStatusList[viewId],
-      description: description
-    };
     const newViewItems = viewItems.map((view) =>
       view.id === viewId
         ? {
@@ -122,47 +133,48 @@ export const AppProvider = ({ children }) => {
           }
         : view
     );
-    fetch(endpoints["update-task"], {
+    newViewItems.forEach((obj)=>{
+      obj.tasks.sort((a,b)=>(parseInt(a.row)-parseInt(b.row)));
+    });
+    newViewItems.map((view)=>{
+      return view.tasks.forEach((task,index)=>{return task.row = index})
+    })
+    fetch(endpoints["set-json"], {
       method: 'POST',
       headers: {
           'Content-Type': 'text/plain',
           'Accept': '*/*'
       },
-      body: JSON.stringify(apiData)
-    });
+      body: JSON.stringify(newViewItems)
+  })
     setViewItems(newViewItems);
   };
 
   const changeView = (currentTask, fromViewId, toViewId) => {
     // console.log({ currentTask, fromViewId, toViewId });
-    const currentTaskId = currentTask.id;
+    // const currentTaskId = currentTask.id;
     const newTask = {
       id: uuid(),
       title: currentTask.title,
-      scheduleDate: "",
+      row: viewItems[toViewId].tasks.length,
       status: taskStatusList[toViewId],
       description: currentTask.description,
     };
-    let apiData = {
-      id: newTask.id,
-      title: newTask.title,
-      scheduleDate: newTask.scheduleDate,
-      status: taskStatusList[toViewId],
-      description: newTask.description
-    };
-    const newViewItems = viewItems.map((view) =>
-      view.id === toViewId
-        ? { ...view, tasks: [...view.tasks, newTask] }
-        : view
+    const newViewItems = viewItems.map((view) =>{
+      if (view.id === toViewId){
+        return { ...view, tasks: [...view.tasks, newTask] }
+      }
+       else{
+        return view
+       }
+    }
     );
-    fetch(endpoints["add-task"], {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'text/plain',
-          'Accept': '*/*'
-      },
-      body: JSON.stringify(apiData)
-  })
+    newViewItems.forEach((obj)=>{
+      obj.tasks.sort((a,b)=>(parseInt(a.row)-parseInt(b.row)));
+    });
+    newViewItems.map((view)=>{
+      return view.tasks.forEach((task,index)=>{return task.row = index})
+    })
     setViewItems(newViewItems);
     // remove task from previous view
     // call api to delete that currentTaskId
@@ -174,17 +186,17 @@ export const AppProvider = ({ children }) => {
           }
         : view
     );
-    apiData = {
-      id: currentTaskId
-    };
-    fetch(endpoints["delete-task"], {
+    newViewItems2.map((view)=>{
+      return view.tasks.forEach((task,index)=>{return (task.row = index)})
+    })
+    fetch(endpoints["set-json"], {
       method: 'POST',
       headers: {
           'Content-Type': 'text/plain',
           'Accept': '*/*'
-      },
-      body: JSON.stringify(apiData)
-    });
+      }, 
+      body: JSON.stringify(newViewItems2)
+  })
     setViewItems(newViewItems2);
     // deleteTask(currentTask.id, fromViewId);
   };
@@ -198,6 +210,7 @@ export const AppProvider = ({ children }) => {
     deleteTask,
     updateTask,
     changeView,
+    updateAllTasks
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

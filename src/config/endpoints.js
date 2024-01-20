@@ -1,14 +1,15 @@
 const request = {
-    "post": "https://script.google.com/macros/s/AKfycbzgJ7eUlA_PAvDihPovygdPoYYbjKu3srByTeJUYjRKFcfg-tytgOJjwVzfI6p23_pH/exec",
-    "get": "https://script.google.com/macros/s/AKfycbwiLO0D8PwRItiZ-LXsCe0_pAaOhtrZYh9tdHAraTmjCO0s9azxAerj5WQdGZlYDDhC/exec"
+    "url": "https://script.google.com/macros/s/AKfycbyrASzQCOKy6BhsJrJL7VCdLhlnGvJ5IWo3rOf1OrFDypA40N4NRL_v6jeVJzcIdAx-/exec",
 }
 
 const endpoints = {
-    "get-tags": request.get + '?exec=allTags',
-    "get-all-tasks": request.get + '?exec=allTasks',
-    "add-task": request.post + '?exec=add',
-    "delete-task": request.post + '?exec=delete',
-    "update-task": request.post + '?exec=update'
+    "get-json": request.url + '?exec=getJSON',
+    "set-json": request.url + '?exec=setJSON',
+    "get-tags": request.url + '?exec=allTags',
+    "get-all-tasks": request.url + '?exec=allTasks',
+    "add-task": request.url + '?exec=add',
+    "delete-task": request.url + '?exec=delete',
+    "update-task": request.url + '?exec=update'
 }
 
 

@@ -7,13 +7,12 @@ function TaskDrawer({ currentView, isOpen, setIsOpen }) {
 
   const currentTask = currentView.tasks.find((task) => task.id === taskId);
   const [description, setDescription] = useState("");
-  const [scheduleDate, setScheduleDate] = useState("");
   const [title, setTitle] = useState("");
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const handleBlur = () => {
     if (title) {
-      updateTask(taskId, currentView.id, title, description,scheduleDate);
+      updateTask(taskId, currentView.id, title, description);
     }
   };
 
@@ -37,8 +36,6 @@ function TaskDrawer({ currentView, isOpen, setIsOpen }) {
     if (currentTask) {
       setDescription(currentTask.description);
       setTitle(currentTask.title);
-      console.log(currentTask.scheduleDate);
-      setScheduleDate(currentTask.scheduleDate);
       onkeydown = (e) => {
         if (e.key === "Escape") {
           handleClose();
