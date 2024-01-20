@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import endpoints from "../config/endpoints";
 import uuid from 'react-uuid';
-import { data } from "../data/data";
 export const AppContext = createContext();
 
 export function useTask() {
