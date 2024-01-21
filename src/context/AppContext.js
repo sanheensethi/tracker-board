@@ -161,7 +161,7 @@ export const AppProvider = ({ children }) => {
     };
     const newViewItems = viewItems.map((view) =>{
       if (view.id === toViewId){
-        return { ...view, tasks: [...view.tasks, newTask] }
+        return { ...view, tasks: [newTask,...view.tasks] }
       }
        else{
         return view
