@@ -6,6 +6,7 @@ import TaskDrawer from "./TaskDrawer";
 
 function TaskView({ view, viewId }) {
   const [isDownInputVisible, setIsDownInputVisible] = useState(false);
+  const [isUpInputVisible, setIsUpInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { changeView, setTaskId, addTask, updateAllTasks, updateTask } = useTask();
@@ -24,6 +25,7 @@ function TaskView({ view, viewId }) {
   const handleBlur = () => {
     if (!inputValue) {
       setIsDownInputVisible(false);
+      setIsUpInputVisible(false);
     }
     handleNewTask();
   };
@@ -91,10 +93,31 @@ function TaskView({ view, viewId }) {
       <div className={`onebox flex flex-col w-full gap-1.5 flex-nowrap p-4 rounded-xl ${clr}`}>
       <button
           className="text-gray-400 text-left px-1 text-sm mt-2 cursor-pointer focus:outline-blue-400/80"
-          onClick={() => setIsDownInputVisible(true)}
+          onClick={() => setIsUpInputVisible(true)}
         >
           + New Task
         </button>
+        {isUpInputVisible && (
+          <div className="flex px-3 py-1.5 bg-white drop-shadow-sm rounded w-full cursor-pointer border border-gray-200">
+            <input
+              id="input"
+              type="text"
+              className="w-full text-slate-700 placeholder:font-normal font-semibold text-sm outline-none"
+              placeholder="Add Task Title..."
+              autoFocus
+              value={inputValue}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleNewTask();
+                }
+              }}
+              onBlur={handleBlur}
+            />
+          </div>
+        )}
       {view.tasks.map((task,index) => (
           <div
             key={index} dataid={index} onDrop={handleOnDrop2}
@@ -115,6 +138,12 @@ function TaskView({ view, viewId }) {
             </div>
           </div>
         ))}
+        <button
+          className="text-gray-400 text-left px-1 text-sm mt-2 cursor-pointer focus:outline-blue-400/80"
+          onClick={() => setIsDownInputVisible(true)}
+        >
+          + New Task
+        </button>
         {isDownInputVisible && (
           <div className="flex px-3 py-1.5 bg-white drop-shadow-sm rounded w-full cursor-pointer border border-gray-200">
             <input
