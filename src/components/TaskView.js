@@ -5,7 +5,7 @@ import TaskDrawer from "./TaskDrawer";
 // import { colors } from "../config/colors";
 
 function TaskView({ view, viewId }) {
-  const [isInputVisible, setIsInputVisible] = useState(false);
+  const [isDownInputVisible, setIsDownInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { changeView, setTaskId, addTask, updateAllTasks, updateTask } = useTask();
@@ -23,7 +23,7 @@ function TaskView({ view, viewId }) {
   // * this will add the task to the view
   const handleBlur = () => {
     if (!inputValue) {
-      setIsInputVisible(false);
+      setIsDownInputVisible(false);
     }
     handleNewTask();
   };
@@ -82,13 +82,19 @@ function TaskView({ view, viewId }) {
           <div>{view.tasks.length}</div>
         </div>
         <button
-          onClick={() => setIsInputVisible(true)}
+          onClick={() => setIsDownInputVisible(true)}
           className=" text-gray-400 cursor-pointer"
         >
           +
         </button>
       </div>
       <div className={`onebox flex flex-col w-full gap-1.5 flex-nowrap p-4 rounded-xl ${clr}`}>
+      <button
+          className="text-gray-400 text-left px-1 text-sm mt-2 cursor-pointer focus:outline-blue-400/80"
+          onClick={() => setIsDownInputVisible(true)}
+        >
+          + New Task
+        </button>
       {view.tasks.map((task,index) => (
           <div
             key={index} dataid={index} onDrop={handleOnDrop2}
@@ -109,7 +115,7 @@ function TaskView({ view, viewId }) {
             </div>
           </div>
         ))}
-        {isInputVisible && (
+        {isDownInputVisible && (
           <div className="flex px-3 py-1.5 bg-white drop-shadow-sm rounded w-full cursor-pointer border border-gray-200">
             <input
               id="input"
@@ -130,13 +136,6 @@ function TaskView({ view, viewId }) {
             />
           </div>
         )}
-
-        <button
-          className="text-gray-400 text-left px-1 text-sm mt-2 cursor-pointer focus:outline-blue-400/80"
-          onClick={() => setIsInputVisible(true)}
-        >
-          + New Task
-        </button>
       </div>
       <TaskDrawer
         currentView={view}

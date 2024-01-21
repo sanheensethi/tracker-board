@@ -18,9 +18,11 @@ export const AppProvider = ({ children }) => {
       if (!response.ok){
         throw new Error('Failed to fetch data');
       }
-      let tasks = await response.json();
-      console.log(tasks);
-      setViewItems(tasks);
+      let newViewItems = await response.json();
+      newViewItems.forEach((obj)=>{
+        obj.tasks.sort((a,b)=>(parseInt(a.row)-parseInt(b.row)));
+      });
+      setViewItems(newViewItems);
     }
     fetchData();
   },[])
@@ -62,16 +64,19 @@ export const AppProvider = ({ children }) => {
     const newTask = {
       id: uuid(),
       title,
-      row: Number(viewItems[viewId].tasks.length),
+      row: 0,
       description: "",
       
     };
     const newViewItems = viewItems.map((view) =>
-      view.id === viewId ? { ...view, tasks: [...view.tasks, newTask] } : view
+      view.id === viewId ? { ...view, tasks: [newTask,...view.tasks] } : view
     );
     newViewItems.forEach((obj)=>{
       obj.tasks.sort((a,b)=>(parseInt(a.row)-parseInt(b.row)));
     });
+    newViewItems.map((view)=>{
+      return view.tasks.forEach((task,index)=>{return (task.row = index)})
+    })
     fetch(endpoints["set-json"], {
       method: 'POST',
       headers: {
@@ -155,7 +160,7 @@ export const AppProvider = ({ children }) => {
     const newTask = {
       id: uuid(),
       title: currentTask.title,
-      row: viewItems[toViewId].tasks.length,
+      row: 0,
       status: taskStatusList[toViewId],
       description: currentTask.description,
     };
